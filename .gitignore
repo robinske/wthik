@@ -1,0 +1,4 @@
+env/
+service-secret.json
+app_config.py
+*.pyc
