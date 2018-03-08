@@ -4,6 +4,7 @@ from apiclient import discovery
 from flask import Flask, Response
 
 from datetime import datetime, timedelta
+import json
 
 
 app = Flask(__name__)
@@ -12,10 +13,15 @@ app.config.from_object('app_config')
 
 def _get_credentials():
     SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-    SERVICE_ACCOUNT_FILE = 'service-secret.json'
+    # SERVICE_ACCOUNT_FILE = 'service-secret.json'
 
-    credentials = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE,
+
+    SERVICE_ACCOUNT_INFO = app.config.get("SERVICE_ACCOUNT_INFO") #json.load(open("service-secret.json"))
+
+    print(app.config.get("PRIVATE_KEY"))
+
+    credentials = service_account.Credentials.from_service_account_info(
+        SERVICE_ACCOUNT_INFO,
         scopes=SCOPES,
         subject=app.config.get("SUBJECT"))
 
@@ -25,7 +31,6 @@ def _get_credentials():
 @app.route("/sms", methods=["GET", "POST"])
 def main():
     credentials = _get_credentials()
-
     service = discovery.build('calendar', 'v3', credentials=credentials)
 
     now = datetime.utcnow()

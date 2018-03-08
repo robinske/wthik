@@ -1,3 +1,4 @@
 env/
 service-secret.json
+service-secret-private-key.pem
 *.pyc
