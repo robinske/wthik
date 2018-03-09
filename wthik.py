@@ -13,12 +13,8 @@ app.config.from_object('app_config')
 
 def _get_credentials():
     SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-    # SERVICE_ACCOUNT_FILE = 'service-secret.json'
 
-
-    SERVICE_ACCOUNT_INFO = app.config.get("SERVICE_ACCOUNT_INFO") #json.load(open("service-secret.json"))
-
-    print(app.config.get("PRIVATE_KEY"))
+    SERVICE_ACCOUNT_INFO = app.config.get("SERVICE_ACCOUNT_INFO")
 
     credentials = service_account.Credentials.from_service_account_info(
         SERVICE_ACCOUNT_INFO,
@@ -37,11 +33,11 @@ def main():
     today = now.isoformat() + 'Z'
     tomorrow = (now + timedelta(days=1)).isoformat() + 'Z'
 
-    wthik_id = app.config.get("CALENDAR_ID")
+    calendar_id = app.config.get("CALENDAR_ID")
 
     # let google do the datetime math
     currentEvent = service.events().list(
-        calendarId=wthik_id,
+        calendarId=calendar_id,
         timeMin=today,
         timeMax=tomorrow,
         maxResults=1,
@@ -53,7 +49,7 @@ def main():
 
     if not currentlyTravelingTo:
         futureEvents = service.events().list(
-            calendarId=wthik_id,
+            calendarId=calendar_id,
             timeMin=today,
             maxResults=1,
             singleEvents=True,
