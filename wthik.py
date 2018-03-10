@@ -147,7 +147,7 @@ def main():
     service = discovery.build('calendar', 'v3', credentials=credentials)
     calendar_id = app.config.get("CALENDAR_ID")
 
-    if "where is kelley" in incoming_message.lower():
+    if "where" in incoming_message.lower():
         return where_is_she(service, calendar_id)
     elif "schedule" in incoming_message.lower():
         return travel_schedule(service, calendar_id)
