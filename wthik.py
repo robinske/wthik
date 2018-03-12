@@ -41,7 +41,6 @@ def troll(incoming_message):
 
     if from_num == os.environ.get("MY_MOTHER"):
         msg = "Hi Mom! I love you and I miss you too!"
-
     elif incoming_message == "KELLEY WHERE'S KELLEY" and from_num == os.environ.get("KAT"):
         msg = "I'm right behind you."
 
@@ -103,7 +102,7 @@ def _event_info(event):
     return "{} from {} to {}".format(summary, start, end)
 
 
-def travel_schedule(service, calendar_id):
+def travel_schedule(service, calendar_id, num_events=5):
     now = datetime.utcnow()
     today = now.isoformat() + 'Z'
     tomorrow = (now + timedelta(days=1)).isoformat() + 'Z'
@@ -112,7 +111,7 @@ def travel_schedule(service, calendar_id):
     event_list = service.events().list(
         calendarId=calendar_id,
         timeMin=today,
-        maxResults=5,
+        maxResults=num_events,
         singleEvents=True,
         orderBy='startTime'
     ).execute()
@@ -147,9 +146,13 @@ def main():
     service = discovery.build('calendar', 'v3', credentials=credentials)
     calendar_id = app.config.get("CALENDAR_ID")
 
-    if "where" in incoming_message.lower():
+    normalized_message = incoming_message.lower()
+
+    if "where" in normalized_message:
         return where_is_she(service, calendar_id)
-    elif "schedule" in incoming_message.lower():
+    elif "full schedule" in normalized_message:
+        return travel_schedule(service, calendar_id, 25)
+    elif "schedule" in normalized_message:
         return travel_schedule(service, calendar_id)
     else:
         return help_response()
