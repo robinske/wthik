@@ -1,7 +1,7 @@
 import os
 
 CALENDAR_ID = os.environ["CALENDAR_ID"]
-TRAVELER = "Matt"
+TRAVELER = "Matty"
 PRONOUN = "His"
 
 SERVICE_ACCOUNT_INFO = {
