@@ -1,4 +1,4 @@
-from google.oauth2 import service_account
+from oauth2client.service_account import ServiceAccountCredentials
 from apiclient import discovery
 
 from flask import Flask, Response, request
@@ -17,17 +17,25 @@ app.config.from_object('app_config')
 client = Client()
 
 
-def _get_credentials():
-    SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+def _build_service():
+    scope = 'https://www.googleapis.com/auth/calendar.readonly'
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+        keyfile_dict=app.config.get("SERVICE_ACCOUNT_INFO"),
+        scopes=scope)
+    service = discovery.build('calendar', 'v3', credentials=credentials)
+    return service
 
-    SERVICE_ACCOUNT_INFO = app.config.get("SERVICE_ACCOUNT_INFO")
-
-    credentials = service_account.Credentials.from_service_account_info(
-        SERVICE_ACCOUNT_INFO,
-        scopes=SCOPES,
-        subject=app.config.get("SUBJECT"))
-
-    return credentials
+# def _get_credentials():
+#     SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+#
+#     SERVICE_ACCOUNT_INFO = app.config.get("SERVICE_ACCOUNT_INFO")
+#
+#     credentials = service_account.Credentials.from_service_account_info(
+#         SERVICE_ACCOUNT_INFO,
+#         scopes=SCOPES,
+#         subject=app.config.get("SUBJECT"))
+#
+#     return credentials
 
 
 def troll(incoming_message):
@@ -130,14 +138,19 @@ def help_response():
     resp.message("""Ask me "Where is Kelley?" to see my current whereabouts or "Travel schedule" to see what's coming up.""")
     return str(resp)
 
+@app.route("/test")
+def test():
+    service = _build_service()
+    calendar_id = app.config.get("CALENDAR_ID")
+    return where_is_she(service, calendar_id)
+
 
 @app.route("/sms", methods=["GET", "POST"])
 def main():
     incoming_message = request.values.get("Body")
     troll(incoming_message)
 
-    credentials = _get_credentials()
-    service = discovery.build('calendar', 'v3', credentials=credentials)
+    service = _build_service()
     calendar_id = app.config.get("CALENDAR_ID")
 
     normalized_message = incoming_message.lower()
