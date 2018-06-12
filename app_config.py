@@ -2,7 +2,7 @@ import os
 
 SUBJECT = os.environ["CALENDAR_SUBJECT"]
 CALENDAR_ID = os.environ["CALENDAR_ID"]
-TRAVELER = "Kelley"
+TRAVELER = "Matt"
 
 SERVICE_ACCOUNT_INFO = {
     u"type": "service_account",
