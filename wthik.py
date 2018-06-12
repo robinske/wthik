@@ -5,6 +5,7 @@ from flask import Flask, Response, request
 from datetime import datetime, timedelta
 
 from twilio.rest import Client
+from twilio.twiml.messaging_response import MessagingResponse
 
 import json
 import os
@@ -27,11 +28,6 @@ def _get_credentials():
         subject=app.config.get("SUBJECT"))
 
     return credentials
-
-
-def _twiml_response(msg):
-    twiml = """<Response><Message>{}</Message></Response>""".format(msg)
-    return Response(twiml, mimetype="text/xml")
 
 
 def troll(incoming_message):
@@ -91,7 +87,9 @@ def where_is_she(service, calendar_id):
             event['summary'],
             end)
 
-    return _twiml_response(msg)
+    resp = MessagingResponse()
+    resp.message(msg)
+    return str(resp)
 
 
 def _event_info(event):
@@ -122,19 +120,15 @@ def travel_schedule(service, calendar_id, num_events=5):
         event_response.append(_event_info(event))
 
     msg = "\n".join(event_response)
-    return _twiml_response(msg)
+    resp = MessagingResponse()
+    resp.message(msg)
+    return str(resp)
 
 
 def help_response():
-    twiml = """
-    <Response>
-        <Message>
-            Ask me "Where is Kelley?" to see my current whereabouts or "Travel schedule" to see what's coming up.
-        </Message>
-    </Response>
-    """
-
-    return Response(twiml, mimetype="text/xml")
+    resp = MessagingResponse()
+    resp.message("""Ask me "Where is Kelley?" to see my current whereabouts or "Travel schedule" to see what's coming up.""")
+    return str(resp)
 
 
 @app.route("/sms", methods=["GET", "POST"])
