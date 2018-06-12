@@ -1,28 +1,38 @@
-# Where The Hell Is Kelley
+# Where The Hell Is Kelley?
 
-## Instructions for running this yourself
+Or, how I keep my mom updated on my travel schedule with Python, Twilio and Google Calendar. For a full tutorial on how to run this check out the blog post:
 
-Clone this repo
+https://www.twilio.com/blog/2018/06/how-i-keep-my-mom-updated-on-my-travel-schedule-with-twilio-and-google-calendar.html
 
-Follow the instructions from Google to create a service account: https://developers.google.com/api-client-library/python/auth/service-accounts
+![](https://www.twilio.com/blog/wp-content/uploads/2018/06/Screen-Shot-2018-06-12-at-11.34.16-AM-1024x386.png)
 
-Add your credentials as `service-secret.json` in the project folder
+## Deploying to Heroku
 
-Add `CALENDAR_SUBJECT` and `CALENDAR_ID` as environment variables
+This project has some modifications not mentioned in the blog post to support deploying to Heroku. Make sure you have a Heroku account and [create a new project from the CLI](https://devcenter.heroku.com/articles/heroku-cli)
 
-Create a Twilio account if you don't already have one and purchase a number: https://www.twilio.com/console/phone-numbers/search
+```heroku create```
 
-run the application:
+Set the following as [Heroku environment variables](https://devcenter.heroku.com/articles/config-vars#set-a-config-var) with `heroku config:set VARIABLE_NAME:VARIABLE_VALUE`. You can also find the expected environment variables in [app_config.py](app_config.py).
 
-`python wthik.py`
+```
+CALENDAR_ID
+WTHIK_PROJECT_ID
+WTHIK_PRIVATE_KEY_ID
+WTHIK_PRIVATE_KEY
+WTHIK_CLIENT_EMAIL
+WTHIK_CLIENT_ID
+WTHIK_CLIENT_CERT_URL
+```
 
-run [ngrok](https://ngrok.com/):
+One gotcha: make sure your [private key is formatted correctly](https://github.com/robinske/wthik/issues/1#issuecomment-396741043).
 
-`ngrok http 5000`
+Deploy to Heroku:
 
-copy your ngrok url and paste it in your Twilio phone number configuration as a webhook when `A MESSAGE COMES IN`
+```
+git push heroku master
+```
 
-Send a text to that number and et voila:
+Once deployed, [update your Twilio webhook URL](https://www.twilio.com/blog/2018/06/how-i-keep-my-mom-updated-on-my-travel-schedule-with-twilio-and-google-calendar.html#h.rh3zgjz8i0qb) to point at your Heroku URL instead of an `ngrok` URL. Then test it out by sending an SMS!
 
 ![](https://pbs.twimg.com/media/DXpurHnW0AIOWie.jpg)
 
