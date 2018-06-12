@@ -25,18 +25,6 @@ def _build_service():
     service = discovery.build('calendar', 'v3', credentials=credentials)
     return service
 
-# def _get_credentials():
-#     SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-#
-#     SERVICE_ACCOUNT_INFO = app.config.get("SERVICE_ACCOUNT_INFO")
-#
-#     credentials = service_account.Credentials.from_service_account_info(
-#         SERVICE_ACCOUNT_INFO,
-#         scopes=SCOPES,
-#         subject=app.config.get("SUBJECT"))
-#
-#     return credentials
-
 
 def troll(incoming_message):
     from_num = request.values.get("From")
