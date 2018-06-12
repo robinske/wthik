@@ -1,6 +1,5 @@
 import os
 
-SUBJECT = os.environ["CALENDAR_SUBJECT"]
 CALENDAR_ID = os.environ["CALENDAR_ID"]
 TRAVELER = "Matt"
 

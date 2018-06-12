@@ -1,10 +1,11 @@
-from google.oauth2 import service_account
+from oauth2client.service_account import ServiceAccountCredentials
 from apiclient import discovery
 
 from flask import Flask, Response, request
 from datetime import datetime, timedelta
 
 from twilio.rest import Client
+from twilio.twiml.messaging_response import MessagingResponse
 
 import json
 import os
@@ -16,22 +17,13 @@ app.config.from_object('app_config')
 client = Client()
 
 
-def _get_credentials():
-    SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-
-    SERVICE_ACCOUNT_INFO = app.config.get("SERVICE_ACCOUNT_INFO")
-
-    credentials = service_account.Credentials.from_service_account_info(
-        SERVICE_ACCOUNT_INFO,
-        scopes=SCOPES,
-        subject=app.config.get("SUBJECT"))
-
-    return credentials
-
-
-def _twiml_response(msg):
-    twiml = """<Response><Message>{}</Message></Response>""".format(msg)
-    return Response(twiml, mimetype="text/xml")
+def _build_service():
+    scope = 'https://www.googleapis.com/auth/calendar.readonly'
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+        keyfile_dict=app.config.get("SERVICE_ACCOUNT_INFO"),
+        scopes=scope)
+    service = discovery.build('calendar', 'v3', credentials=credentials)
+    return service
 
 
 def troll(incoming_message):
@@ -91,7 +83,9 @@ def where_is_she(service, calendar_id):
             event['summary'],
             end)
 
-    return _twiml_response(msg)
+    resp = MessagingResponse()
+    resp.message(msg)
+    return str(resp)
 
 
 def _event_info(event):
@@ -122,19 +116,21 @@ def travel_schedule(service, calendar_id, num_events=5):
         event_response.append(_event_info(event))
 
     msg = "\n".join(event_response)
-    return _twiml_response(msg)
+    resp = MessagingResponse()
+    resp.message(msg)
+    return str(resp)
 
 
 def help_response():
-    twiml = """
-    <Response>
-        <Message>
-            Ask me "Where is Kelley?" to see my current whereabouts or "Travel schedule" to see what's coming up.
-        </Message>
-    </Response>
-    """
+    resp = MessagingResponse()
+    resp.message("""Ask me "Where is Kelley?" to see my current whereabouts or "Travel schedule" to see what's coming up.""")
+    return str(resp)
 
-    return Response(twiml, mimetype="text/xml")
+@app.route("/test")
+def test():
+    service = _build_service()
+    calendar_id = app.config.get("CALENDAR_ID")
+    return where_is_she(service, calendar_id)
 
 
 @app.route("/sms", methods=["GET", "POST"])
@@ -142,8 +138,7 @@ def main():
     incoming_message = request.values.get("Body")
     troll(incoming_message)
 
-    credentials = _get_credentials()
-    service = discovery.build('calendar', 'v3', credentials=credentials)
+    service = _build_service()
     calendar_id = app.config.get("CALENDAR_ID")
 
     normalized_message = incoming_message.lower()
