@@ -71,8 +71,9 @@ def where_is_she(service, calendar_id):
 
         event = futureEvents.get('items', [])[0]
         start = event['start'].get('dateTime', event['start'].get('date'))
-        msg = "Doesn't look like {} is currently traveling. Her next trip is to {} on {}".format(
+        msg = "Doesn't look like {} is currently traveling. {} next trip is to {} on {}".format(
             app.config.get("TRAVELER"),
+            app.config.get("PRONOUN"),
             event['summary'],
             start)
     else:
@@ -123,7 +124,10 @@ def travel_schedule(service, calendar_id, num_events=5):
 
 def help_response():
     resp = MessagingResponse()
-    resp.message("""Ask me "Where is Kelley?" to see my current whereabouts or "Travel schedule" to see what's coming up.""")
+    msg = """Ask me "Where is {}?" to see my current whereabouts or "Travel schedule" to see what's coming up.""".format(
+        app.config.get("TRAVELER"),
+        )
+    resp.message(msg)
     return str(resp)
 
 

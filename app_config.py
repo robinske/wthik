@@ -2,6 +2,7 @@ import os
 
 CALENDAR_ID = os.environ["CALENDAR_ID"]
 TRAVELER = "Kelley"
+PRONOUN = "Her"
 
 SERVICE_ACCOUNT_INFO = {
     u"type": "service_account",
