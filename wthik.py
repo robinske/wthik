@@ -1,4 +1,4 @@
-from google.oauth2 import service_account
+from oauth2client.service_account import ServiceAccountCredentials
 from apiclient import discovery
 
 from flask import Flask, Response, request
@@ -17,17 +17,13 @@ app.config.from_object('app_config')
 client = Client()
 
 
-def _get_credentials():
-    SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-
-    SERVICE_ACCOUNT_INFO = app.config.get("SERVICE_ACCOUNT_INFO")
-
-    credentials = service_account.Credentials.from_service_account_info(
-        SERVICE_ACCOUNT_INFO,
-        scopes=SCOPES,
-        subject=app.config.get("SUBJECT"))
-
-    return credentials
+def _build_service():
+    scope = 'https://www.googleapis.com/auth/calendar.readonly'
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+        keyfile_dict=app.config.get("SERVICE_ACCOUNT_INFO"),
+        scopes=scope)
+    service = discovery.build('calendar', 'v3', credentials=credentials)
+    return service
 
 
 def troll(incoming_message):
@@ -136,8 +132,7 @@ def main():
     incoming_message = request.values.get("Body")
     troll(incoming_message)
 
-    credentials = _get_credentials()
-    service = discovery.build('calendar', 'v3', credentials=credentials)
+    service = _build_service()
     calendar_id = app.config.get("CALENDAR_ID")
 
     normalized_message = incoming_message.lower()

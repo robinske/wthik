@@ -1,6 +1,5 @@
-gunicorn
-google-api-python-client
-google-auth-httplib2
-google-auth
-flask
-twilio
+flask==1.0.2
+google-api-python-client==1.7.3
+gunicorn==19.8.1
+oauth2client==4.1.2
+twilio==6.14.4
