@@ -26,21 +26,22 @@ def _build_service():
     return service
 
 
-def troll(incoming_message):
+def notify(incoming_message):
     from_num = request.values.get("From")
+    my_num = os.environ.get("MY_NUMBER")
 
-    msg = None
-
-    if from_num == os.environ.get("MY_MOTHER"):
-        msg = "Hi Mom! I love you and I miss you too!"
-    elif incoming_message == "KELLEY WHERE'S KELLEY" and from_num == os.environ.get("KAT"):
-        msg = "I'm right behind you."
-
-    if msg:
+    if from_num != my_num:
+        msg = "New WTHIK message from {}: '{}'".format(from_num, incoming_message)
         client.api.account.messages.create(
-            to=from_num,
+            to=my_num,
             from_=os.environ["WTHIK_FROM"],
             body=msg)
+
+
+def _subtract_one_day(date_str):
+    # fix the off by one error, at least for US timezones
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    return dt - timedelta(days=1)
 
 
 def where_is_she(service, calendar_id):
@@ -78,7 +79,7 @@ def where_is_she(service, calendar_id):
             start)
     else:
         event = currentlyTravelingTo[0]
-        end = event['end'].get('dateTime', event['end'].get('date'))
+        end = _subtract_one_day(event['end'].get('dateTime', event['end'].get('date'))).strftime("%B %d, %Y")
         msg = "{} is currently in {} until {}".format(
             app.config.get("TRAVELER"),
             event['summary'],
@@ -91,7 +92,7 @@ def where_is_she(service, calendar_id):
 
 def _event_info(event):
     start = event['start'].get('date')
-    end = event['end'].get('date')
+    end = _subtract_one_day(event['end'].get('date')).strftime("%Y-%m-%d")
     summary = event['summary']
 
     return "{} from {} to {}".format(summary, start, end)
@@ -134,12 +135,11 @@ def help_response():
 @app.route("/sms", methods=["GET", "POST"])
 def main():
     incoming_message = request.values.get("Body")
-    troll(incoming_message)
-
     service = _build_service()
     calendar_id = app.config.get("CALENDAR_ID")
 
     normalized_message = incoming_message.lower()
+    notify(normalized_message)
 
     if "where" in normalized_message:
         return where_is_she(service, calendar_id)
@@ -149,8 +149,3 @@ def main():
         return travel_schedule(service, calendar_id)
     else:
         return help_response()
-
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
