@@ -98,7 +98,7 @@ def _event_info(event):
     return "{} from {} to {}".format(summary, start, end)
 
 
-def travel_schedule(service, calendar_id, num_events=5):
+def travel_schedule(service, calendar_id):
     now = datetime.utcnow()
     today = now.isoformat() + 'Z'
 
@@ -106,7 +106,7 @@ def travel_schedule(service, calendar_id, num_events=5):
     event_list = service.events().list(
         calendarId=calendar_id,
         timeMin=today,
-        maxResults=num_events,
+        maxResults=25,
         singleEvents=True,
         orderBy='startTime'
     ).execute()
@@ -124,7 +124,7 @@ def travel_schedule(service, calendar_id, num_events=5):
 
 def help_response():
     resp = MessagingResponse()
-    msg = """Ask me "Where is {}?" to see my current whereabouts or "Travel schedule" to see what's coming up.""".format(
+    msg = """Ask me "Where's {}?" to see my current whereabouts or "Schedule" to see what's coming up.""".format(
         app.config.get("TRAVELER"),
         )
     resp.message(msg)
@@ -142,8 +142,6 @@ def main():
 
     if "where" in normalized_message:
         return where_is_she(service, calendar_id)
-    elif "full schedule" in normalized_message:
-        return travel_schedule(service, calendar_id, 25)
     elif "schedule" in normalized_message:
         return travel_schedule(service, calendar_id)
     else:
