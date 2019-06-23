@@ -101,7 +101,6 @@ def _event_info(event):
 def travel_schedule(service, calendar_id, num_events=5):
     now = datetime.utcnow()
     today = now.isoformat() + 'Z'
-    tomorrow = (now + timedelta(days=1)).isoformat() + 'Z'
 
     # let google do the datetime math
     event_list = service.events().list(
@@ -112,7 +111,7 @@ def travel_schedule(service, calendar_id, num_events=5):
         orderBy='startTime'
     ).execute()
 
-    event_response = ["My next five planned events are:\n"]
+    event_response = ["Here's my upcoming schedule:\n"]
 
     for event in event_list.get("items", []):
         event_response.append(_event_info(event))
